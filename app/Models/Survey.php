@@ -15,6 +15,10 @@ class Survey extends Model
     {
         return $this->hasMany(SurveyAnswer::class);
     }
+    public function organisation()
+    {
+        return $this->belongsTo(Organization::class);
+    }
     use HasFactory;
 
     protected $table    = 'surveys';

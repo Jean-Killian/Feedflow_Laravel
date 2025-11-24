@@ -11,7 +11,7 @@ class Organization extends Model
     {
         return $this->hasMany(Survey::class);
     }
-    public function Organizationusers()
+    public function OrganizationUsers()
     {
         return $this->hasMany(OrganizationUser::class);
     }

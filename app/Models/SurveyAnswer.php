@@ -10,7 +10,7 @@ class SurveyAnswer extends Model
 {
     public function survey()
     {
-        return $this->BelongsTo(Survey::class)
+        return $this->BelongsTo(Survey::class);
     }
     use HasFactory;
 
