@@ -7,6 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class Organization extends Model
 {
+    public function surveys()
+    {
+        return $this->hasMany(Survey::class);
+    }
+    public function Organizationusers()
+    {
+        return $this->hasMany(OrganizationUser::class);
+    }
     use HasFactory;
 
     protected $table    = 'organizations';

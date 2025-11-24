@@ -7,6 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class Survey extends Model
 {
+    public function surveyQuestion()
+    {
+        return $this->hasMany(SurveyQuestion::class);
+    }
+    public function surveyAnswers()
+    {
+        return $this->hasMany(SurveyAnswer::class);
+    }
     use HasFactory;
 
     protected $table    = 'surveys';

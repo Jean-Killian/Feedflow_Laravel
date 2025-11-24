@@ -10,6 +10,12 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
+    public function organizationUser()
+    {
+        return $this->BelongsTo(OrganizationUser::class);
+    }
+
+
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
