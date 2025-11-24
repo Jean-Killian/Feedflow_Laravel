@@ -6,23 +6,19 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StoreSurveyQuestionRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        return false;
+        $survey = $this->route('survey'); // si tu passes le survey via route
+        return $survey && $this->user()->can('update', $survey);
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
-            //
+            'survey_id' => 'required|exists:surveys,id',
+            'question' => 'required|string|max:255',
+            'type' => 'required|in:single_choice,multiple_choice,text,scale',
+            'data' => 'nullable|array',
         ];
     }
 }

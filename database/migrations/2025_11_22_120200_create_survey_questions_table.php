@@ -10,20 +10,19 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-    {
-        Schema::create('survey_questions', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
+{
+    Schema::create('survey_questions', function (Blueprint $table) {
+        $table->engine = 'InnoDB';
 
-            $table->id();
-            $table->unsignedBigInteger('survey_id');
-            $table->string('title');
-            $table->string('question_type');
-            $table->json('options');
-            $table->timestamps();
+        $table->id();
+        $table->foreignId('survey_id')->constrained()->onDelete('cascade');
+        $table->string('question'); // titre de la question
+        $table->enum('type', ['single_choice', 'multiple_choice', 'text', 'scale']);
+        $table->json('data')->nullable(); // options JSON pour les choix multiples
+        $table->timestamps();
+    });
+}
 
-            $table->foreign('survey_id')->references('id')->on('surveys')->onDelete('cascade');
-        });
-    }
 
     /**
      * Reverse the migrations.

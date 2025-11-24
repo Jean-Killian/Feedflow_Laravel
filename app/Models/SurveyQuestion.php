@@ -9,13 +9,20 @@ class SurveyQuestion extends Model
 {
     use HasFactory;
 
-    protected $table    = 'surveys';
-    public $timestamps  = true;
+    protected $table = 'survey_questions';
     protected $fillable = [
-        'id', 'survey_id',
-        'title', 'question_type', 'options',
-        'created_at', 'updated_at'
+        'survey_id',
+        'question',
+        'type',
+        'data', // options JSON pour les questions à choix multiples
     ];
+
     protected $casts = [
+        'data' => 'array', // convertit automatiquement JSON <-> array
     ];
+
+    public function survey()
+    {
+        return $this->belongsTo(Survey::class);
+    }
 }
