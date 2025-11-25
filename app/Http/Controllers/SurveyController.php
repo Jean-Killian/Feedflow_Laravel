@@ -101,33 +101,41 @@ class SurveyController extends Controller
 
     public function takeSurvey(Survey $survey)
     {
-        $this->authorize('view', $survey);
+        $user = auth()->user();
 
-        // Vérifie si  déjà répondu
-        $answered = $survey->answers()
-                        ->where('user_id', auth()->id())
-                        ->exists();
+        // Vérifie si l'utilisateur a déjà répondu à ce sondage
+        $hasAnswered = $survey->answers()->where('user_id', $user->id)->exists();
 
-        return view('surveys.take', compact('survey', 'answered'));
+        if ($hasAnswered) {
+            return redirect()->route('surveys.index')
+                ->with('info', 'Vous avez déjà répondu à ce sondage.');
+        }
+
+        return view('surveys.take', compact('survey'));
     }
+
 
     public function submitSurvey(Request $request, Survey $survey)
     {
+        $user = $request->user();
+
+        if ($survey->answers()->where('user_id', $user->id)->exists()) {
+            return redirect()->route('surveys.index')
+                ->with('info', 'Vous avez déjà répondu à ce sondage.');
+        }
+
         $answers = $request->input('answers', []);
 
         foreach ($survey->questions as $question) {
             $answerValue = $answers[$question->id] ?? null;
-
-            // Ignore si aucune réponse (ou gérer comme tu veux)
             if ($answerValue === null) continue;
 
-            // Si c'est un tableau (checkbox)
             if (is_array($answerValue)) {
                 $answerValue = json_encode($answerValue);
             }
 
             \DB::table('survey_answers')->insert([
-                'user_id' => $request->user()->id,
+                'user_id' => $user->id,
                 'survey_question_id' => $question->id,
                 'answer' => $answerValue,
                 'survey_id' => $survey->id,
@@ -136,8 +144,10 @@ class SurveyController extends Controller
             ]);
         }
 
-        return redirect()->route('surveys.index')->with('success', 'Sondage répondu !');
+        return redirect()->route('surveys.index')
+            ->with('success', 'Sondage répondu !');
     }
+
 
 
 }

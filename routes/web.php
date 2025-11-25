@@ -31,7 +31,7 @@ Route::middleware('auth')->prefix('surveys')->group(function () {
     Route::get('/{survey}/edit', [SurveyController::class, 'edit'])->name('surveys.edit');
     Route::put('/{survey}', [SurveyController::class, 'update'])->name('surveys.update');
     Route::delete('/{survey}', [SurveyController::class, 'destroy'])->name('surveys.destroy');
-    Route::get('/{survey}', [SurveyController::class, 'show'])->name('surveys.show');
+
 
     // Gestion des questions
     Route::get('/{survey}/questions/create', [SurveyController::class, 'addQuestionForm'])

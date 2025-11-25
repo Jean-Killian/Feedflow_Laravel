@@ -13,7 +13,12 @@
     </div>
 
     @foreach($surveys as $survey)
-        <div class="bg-white shadow-md rounded-lg p-6 mb-5 border">
+        @php
+            // Vérifie si l'utilisateur connecté a déjà répondu
+            $hasAnswered = $survey->answers->where('user_id', auth()->id())->count() > 0;
+        @endphp
+
+        <div class="shadow-md rounded-lg p-6 mb-5 border {{ $hasAnswered ? 'bg-green-100' : 'bg-white' }}">
 
             <div class="flex justify-between items-center">
                 <div>
@@ -33,18 +38,18 @@
             </p>
 
             <div class="mt-5 flex gap-3">
-                
-                {{-- Bouton Voir --}}
-                <a href="{{ route('surveys.show', $survey) }}"
-                   class="px-4 py-2 bg-blue-600 text-black rounded hover:bg-blue-700">
-                    👁 Voir
-                </a>
 
                 {{-- Bouton Répondre --}}
-                <a href="{{ route('surveys.take', $survey) }}"
-                   class="px-4 py-2 bg-indigo-600 text-black rounded hover:bg-indigo-700">
-                    📝 Répondre
-                </a>
+                @if(!$hasAnswered)
+                    <a href="{{ route('surveys.take', $survey) }}"
+                       class="px-4 py-2 bg-indigo-600 text-black rounded hover:bg-indigo-700">
+                        📝 Répondre
+                    </a>
+                @else
+                    <span class="px-4 py-2 bg-gray-400 text-black rounded">
+                        ✅ Déjà répondu
+                    </span>
+                @endif
 
                 {{-- Bouton Ajouter des questions --}}
                 <a href="{{ route('surveys.add_question', $survey) }}"
