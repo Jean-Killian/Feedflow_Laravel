@@ -16,16 +16,19 @@ final class SurveyDTO
         public int $user_id,
     ) {}
 
-      public static function fromRequest(Request $request): self
-    {
-        return new self(
-            $request->title,
-            $request->description,
-            $request->start_date,
-            $request->end_date,
-            $request->boolean('is_anonymous'),
-            session('organization_id'),
-            $request->user()->id
-        );
-    }
+      public static function fromRequest($request)
+        {
+            return new self(
+                $request->title,
+                $request->description,
+                $request->start_date,
+                $request->end_date,
+                $request->boolean('is_anonymous'),
+                1, 
+                $request->user()->id
+            );
+        }
+
+
+
 }

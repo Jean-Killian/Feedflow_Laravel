@@ -18,7 +18,8 @@ class SurveyController extends Controller
 {
     public function index()
     {
-        $organizationId = session('organization_id');
+
+        $organizationId = 1;
         $surveys = Survey::where('organization_id', $organizationId)->get();
 
         return view('surveys.index', compact('surveys'));
@@ -30,14 +31,13 @@ class SurveyController extends Controller
     }
 
     public function store(StoreSurveyRequest $request)
-    {
-        
+{
     $this->authorize('create', Survey::class);
 
-    // Récupère l'organisation de l'utilisateur connecté
-    $organizationId = $request->user()->organization_id; // <-- Ici
+    // Organisation temporaire
+    $organizationId = 1;
 
-    // Crée le DTO avec l'organisation correcte
+    // Crée le DTO avec organisation 1
     $dto = new SurveyDTO(
         $request->title,
         $request->description,
@@ -48,11 +48,11 @@ class SurveyController extends Controller
         $request->user()->id
     );
 
-    // Crée le sondage
     $survey = app(StoreSurveyAction::class)->execute($dto);
 
     return redirect()->route('surveys.index')->with('success', 'Sondage créé !');
 }
+
 
     public function show(Survey $survey)
     {
