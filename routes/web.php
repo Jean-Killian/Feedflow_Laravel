@@ -4,6 +4,7 @@ use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\ProfileController;
 use App\Models\Organization;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\SurveyController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -22,5 +23,24 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::post('/testOrganization', [OrganizationController::class, 'store']);
 });
+
+Route::middleware('auth')->group(function () {
+    Route::get('/surveys', [SurveyController::class, 'index'])->name('surveys.index');
+    Route::get('/surveys/create', [SurveyController::class, 'create'])->name('surveys.create');
+    Route::post('/surveys', [SurveyController::class, 'store'])->name('surveys.store');
+    Route::get('/surveys/{survey}', [SurveyController::class, 'show'])->name('surveys.show');
+    Route::get('/surveys/{survey}/edit', [SurveyController::class, 'edit'])->name('surveys.edit');
+    Route::put('/surveys/{survey}', [SurveyController::class, 'update'])->name('surveys.update');
+    Route::delete('/surveys/{survey}', [SurveyController::class, 'destroy'])->name('surveys.destroy');
+});
+
+Route::post('/surveys/{survey}/questions', [SurveyController::class, 'addQuestion'])->name('surveys.questions.store');
+
+Route::middleware('auth')->group(function () {
+    Route::resource('surveys', SurveyController::class);
+});
+
+Route::get('/surveys/create', [SurveyController::class, 'create'])->name('surveys.create');
+Route::post('/surveys', [SurveyController::class, 'store'])->name('surveys.store');
 
 require __DIR__.'/auth.php';

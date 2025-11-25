@@ -29,7 +29,7 @@ class SurveyPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -37,16 +37,19 @@ class SurveyPolicy
      */
     public function update(User $user, Survey $survey): bool
     {
-        return false;
+        return $survey->user_id === $user->id
+            || $user->isAdminOf($survey->organization);
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Survey $survey): bool
+    public function delete(User $user, Survey $survey)
     {
-        return false;
+        return $survey->user_id === $user->id
+            || $user->isAdminOf($survey->organization);
     }
+
 
     /**
      * Determine whether the user can restore the model.

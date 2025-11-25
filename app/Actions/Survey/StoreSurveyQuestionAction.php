@@ -1,21 +1,19 @@
 <?php
+
 namespace App\Actions\Survey;
 
-use App\DTOs\SurveyDTO;
-use Illuminate\Support\Facades\DB;
+use App\Models\SurveyQuestion;
+use App\DTOs\SurveyQuestionDTO;
 
 final class StoreSurveyQuestionAction
 {
-    public function __construct() {}
-
-    /**
-     * Store a Survey
-     * @param SurveyDTO $dto
-     * @return array
-     */
-    public function handle(SurveyDTO $dto): array
+    public function execute(SurveyQuestionDTO $dto): SurveyQuestion
     {
-        return DB::transaction(function () use ($dto) {
-        });
+        return SurveyQuestion::create([
+            'survey_id' => $dto->survey_id,
+            'question' => $dto->question,
+            'type' => $dto->type,
+            'data' => $dto->data,
+        ]);
     }
 }
