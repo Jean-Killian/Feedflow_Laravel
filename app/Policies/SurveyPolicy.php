@@ -37,8 +37,8 @@ class SurveyPolicy
      */
     public function update(User $user, Survey $survey): bool
     {
-         return $survey->user_id === $user->id
-        || $user->isAdminOf($survey->organization);
+        return $survey->user_id === $user->id
+            || $user->isAdminOf($survey->organization);
     }
 
     /**

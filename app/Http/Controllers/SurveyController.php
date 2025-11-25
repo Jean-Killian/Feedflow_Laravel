@@ -30,28 +30,19 @@ class SurveyController extends Controller
         return view('surveys.create');
     }
 
+    /**
+     * 
+     */
     public function store(StoreSurveyRequest $request)
-{
-    $this->authorize('create', Survey::class);
+    {
+        $this->authorize('create', Survey::class);
 
-    // Organisation temporaire
-    $organizationId = 1;
+        // Crée le DTO avec organisation 1
+        $dto = SurveyDTO::fromRequest($request);
+        $survey = app(StoreSurveyAction::class)->execute($dto);
 
-    // Crée le DTO avec organisation 1
-    $dto = new SurveyDTO(
-        $request->title,
-        $request->description,
-        $request->start_date,
-        $request->end_date,
-        $request->boolean('is_anonymous'),
-        $organizationId,
-        $request->user()->id
-    );
-
-    $survey = app(StoreSurveyAction::class)->execute($dto);
-
-    return redirect()->route('surveys.index')->with('success', 'Sondage créé !');
-}
+        return redirect()->route('surveys.index')->with('success', 'Sondage créé !');
+    }
 
 
     public function show(Survey $survey)
@@ -63,20 +54,21 @@ class SurveyController extends Controller
 
     public function edit(Survey $survey)
     {
-        $this->authorize('update', $survey);
+        $this->authorize('update', $survey); 
 
         return view('surveys.edit', compact('survey'));
     }
 
     public function update(UpdateSurveyRequest $request, Survey $survey)
     {
-        $this->authorize('update', $survey);
+        $this->authorize('update', $survey); 
 
         $dto = SurveyDTO::fromRequest($request);
-        $survey = app(UpdateSurveyAction::class)->execute($dto);
+        app(UpdateSurveyAction::class)->execute($dto, $survey);
 
         return redirect()->route('surveys.index')->with('success', 'Sondage mis à jour !');
     }
+
 
     public function destroy(Survey $survey)
     {

@@ -3,20 +3,22 @@
 namespace App\Actions\Survey;
 
 use App\DTOs\SurveyDTO;
-use App\Models\Survey; // <-- AJOUTER CETTE LIGNE
+use App\Models\Survey; 
 
-final class StoreSurveyAction
+
+final class UpdateSurveyAction
 {
-    public function execute(SurveyDTO $dto): Survey
+    public function execute(SurveyDTO $dto, Survey $survey): Survey
     {
-        return Survey::create([
+        $survey->update([
             'title' => $dto->title,
             'description' => $dto->description,
             'start_date' => $dto->start_date,
             'end_date' => $dto->end_date,
             'is_anonymous' => $dto->is_anonymous,
             'organization_id' => $dto->organization_id,
-            'user_id' => $dto->user_id,
         ]);
+
+        return $survey;
     }
 }

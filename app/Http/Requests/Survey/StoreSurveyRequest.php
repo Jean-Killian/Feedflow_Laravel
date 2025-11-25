@@ -11,7 +11,7 @@ class StoreSurveyRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user()->can('create', Survey::class);
+        return true;
     }
 
     /**
