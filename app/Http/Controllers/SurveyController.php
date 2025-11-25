@@ -12,7 +12,7 @@ use App\Http\Requests\Survey\StoreSurveyQuestionRequest;
 use App\DTOs\SurveyQuestionDTO;
 use App\Actions\Survey\StoreSurveyQuestionAction;
 use App\Http\Controllers\Controller;
-
+use Illuminate\Http\Request; 
 
 class SurveyController extends Controller
 {
@@ -49,7 +49,7 @@ class SurveyController extends Controller
     {
         $this->authorize('view', $survey);
 
-        return view('surveys.show', compact('survey'));
+        return view('surveys.index', compact('survey'));
     }
 
     public function edit(Survey $survey)
@@ -79,13 +79,23 @@ class SurveyController extends Controller
         return redirect()->route('surveys.index')->with('success', 'Sondage supprimé !');
     }
 
-    public function addQuestion(StoreSurveyQuestionRequest $request, Survey $survey)
-{
-    $this->authorize('update', $survey);
+    public function addQuestion(Request $request, Survey $survey)
+    {
+        $this->authorize('update', $survey);
 
-    $dto = SurveyQuestionDTO::fromRequest($request);
-    app(StoreSurveyQuestionAction::class)->execute($dto);
+        $dto = SurveyQuestionDTO::fromRequest($request, $survey->id);
+        app(StoreSurveyQuestionAction::class)->execute($dto);
 
-    return redirect()->route('surveys.show', $survey)->with('success', 'Question ajoutée !');
+        return redirect()->route('surveys.index', $survey)
+            ->with('success', 'Question ajoutée !');
+    }
+
+
+    public function addQuestionForm(Survey $survey)
+    {
+        $this->authorize('update', $survey);
+
+        return view('surveys.add_question', compact('survey'));
+    }
 }
-}
+

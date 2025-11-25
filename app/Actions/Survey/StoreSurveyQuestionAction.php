@@ -11,9 +11,9 @@ final class StoreSurveyQuestionAction
     {
         return SurveyQuestion::create([
             'survey_id' => $dto->survey_id,
-            'question' => $dto->question,
-            'type' => $dto->type,
-            'data' => $dto->data,
+            'title' => $dto->title,
+            'question_type' => $dto->question_type,
+            'options' => $dto->options,
         ]);
     }
 }

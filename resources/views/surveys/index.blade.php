@@ -33,7 +33,7 @@
                         <td class="p-2 border">{{ $survey->start_date }}</td>
                         <td class="p-2 border">{{ $survey->end_date }}</td>
                         <td class="p-2 border flex gap-2">
-                            <a href="{{ route('surveys.show', $survey) }}" class="text-blue-500">Voir</a>
+                            <a href="{{ route('surveys.add_question', $survey) }}" class="text-blue-500">ajouter une question</a>
                             <a href="{{ route('surveys.edit', $survey) }}" class="text-yellow-500">Modifier</a>
                             <form action="{{ route('surveys.destroy', $survey) }}" method="POST" onsubmit="return confirm('Supprimer ce sondage ?')">
                                 @csrf

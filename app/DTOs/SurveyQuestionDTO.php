@@ -8,18 +8,28 @@ final class SurveyQuestionDTO
 {
     public function __construct(
         public int $survey_id,
-        public string $question,
-        public string $type,
-        public ?array $data = null
+        public string $title,
+        public string $question_type,
+        public ?array $options = null,
     ) {}
 
-    public static function fromRequest(Request $request): self
+    public static function fromRequest(Request $request, int $survey_id): self
     {
+        
+        $options = $request->input('options');
+
+        
+        if (!empty($options)) {
+            $options = array_map('trim', explode(',', $options));
+        } else {
+            $options = null;
+        }
+
         return new self(
-            $request->survey_id,
-            $request->question,
-            $request->type,
-            $request->input('data') // tableau pour JSON
+            survey_id: $survey_id,
+            title: $request->input('title'),
+            question_type: $request->input('question_type'),
+            options: $options
         );
     }
 }
