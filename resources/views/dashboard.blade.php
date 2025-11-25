@@ -15,11 +15,13 @@
         </div>
     </div>
     <div>
-        <form action="{{ url('testOrganization') }}" method="POST">
+        <form action="{{ route('organization.store') }}" method="POST">
         @csrf
         <label for="nom">Entrez votre nom : </label>
         <input type="text" name="name" id="nom">
         <input type="submit" value="Envoyer !">
+    </form>
+
     </form>
     </div>
 </x-app-layout>

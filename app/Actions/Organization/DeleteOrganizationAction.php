@@ -14,8 +14,8 @@ final class DeleteOrganizationAction
      * @param OrganizationDTO $dto
      * @return array
      */
-    public function execute (int $id): bool|null
+    public function execute (Organization $organization): bool|null
     {
-        return Organization::where('id',$id)->delete();
+        return $organization->delete();
     }
 }

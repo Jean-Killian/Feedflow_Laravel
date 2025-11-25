@@ -19,6 +19,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::post('/organization/store', [OrganizationController::class, 'store'])->name('organization.store');
+    Route::patch('/organization/update/{organization}', action: [OrganizationController::class, 'store'])->name('organization.update');
     Route::delete('/organization/delete/{organization}', action: [OrganizationController::class, 'delete'])->name('organization.delete');
 });
 
