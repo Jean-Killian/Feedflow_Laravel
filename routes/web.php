@@ -21,9 +21,10 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// Routes surveys et questions
+// Routes surveys
 Route::middleware('auth')->prefix('surveys')->group(function () {
-    // CRUD pour les sondages
+
+    // CRUD Sondages
     Route::get('/', [SurveyController::class, 'index'])->name('surveys.index');
     Route::get('/create', [SurveyController::class, 'create'])->name('surveys.create');
     Route::post('/', [SurveyController::class, 'store'])->name('surveys.store');
@@ -32,11 +33,17 @@ Route::middleware('auth')->prefix('surveys')->group(function () {
     Route::delete('/{survey}', [SurveyController::class, 'destroy'])->name('surveys.destroy');
     Route::get('/{survey}', [SurveyController::class, 'show'])->name('surveys.show');
 
-    // Ajout de questions
+    // Gestion des questions
     Route::get('/{survey}/questions/create', [SurveyController::class, 'addQuestionForm'])
         ->name('surveys.add_question');
-    Route::post('/surveys/{survey}/questions', [SurveyController::class, 'addQuestion'])
+    Route::post('/{survey}/questions', [SurveyController::class, 'addQuestion'])
         ->name('surveys.store_question');
+
+    // Participer / répondre au sondage
+    Route::get('/{survey}/take', [SurveyController::class, 'takeSurvey'])
+        ->name('surveys.take');
+    Route::post('/{survey}/submit', [SurveyController::class, 'submitSurvey'])
+        ->name('surveys.submit');
 });
 
 require __DIR__.'/auth.php';

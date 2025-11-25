@@ -7,15 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class SurveyAnswer extends Model
 {
-    use HasFactory;
-
-    protected $table    = 'survey_answers';
-    public $timestamps  = true;
     protected $fillable = [
-        'id', 'survey_id', 'survey_question_id', 'user_id',
+        'user_id',
+        'survey_question_id',
         'answer',
-        'created_at', 'updated_at'
     ];
-    protected $casts = [
-    ];
+
+    public function question()
+    {
+        return $this->belongsTo(SurveyQuestion::class, 'survey_question_id');
+    }
 }
+

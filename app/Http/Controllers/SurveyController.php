@@ -49,8 +49,9 @@ class SurveyController extends Controller
     {
         $this->authorize('view', $survey);
 
-        return view('surveys.index', compact('survey'));
+        return view('surveys.show', compact('survey'));
     }
+
 
     public function edit(Survey $survey)
     {
@@ -97,5 +98,47 @@ class SurveyController extends Controller
 
         return view('surveys.add_question', compact('survey'));
     }
+
+    public function takeSurvey(Survey $survey)
+    {
+        $this->authorize('view', $survey);
+
+        // Vérifie si  déjà répondu
+        $answered = $survey->answers()
+                        ->where('user_id', auth()->id())
+                        ->exists();
+
+        return view('surveys.take', compact('survey', 'answered'));
+    }
+
+    public function submitSurvey(Request $request, Survey $survey)
+    {
+        $answers = $request->input('answers', []);
+
+        foreach ($survey->questions as $question) {
+            $answerValue = $answers[$question->id] ?? null;
+
+            // Ignore si aucune réponse (ou gérer comme tu veux)
+            if ($answerValue === null) continue;
+
+            // Si c'est un tableau (checkbox)
+            if (is_array($answerValue)) {
+                $answerValue = json_encode($answerValue);
+            }
+
+            \DB::table('survey_answers')->insert([
+                'user_id' => $request->user()->id,
+                'survey_question_id' => $question->id,
+                'answer' => $answerValue,
+                'survey_id' => $survey->id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        return redirect()->route('surveys.index')->with('success', 'Sondage répondu !');
+    }
+
+
 }
 
