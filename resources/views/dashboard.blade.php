@@ -30,4 +30,16 @@
             </div>
         </div>
     </div>
+
+    <div class="py-6">
+        <div class="sm:px-6 lg:px-8">
+            <a 
+                href="{{ route('surveys.index') }}"
+                class="inline-block bg-indigo-600 text-black font-medium px-4 py-2 rounded-lg hover:bg-indigo-700 transition"
+            >
+                Voir mes sondages
+            </a>
+        </div>
+    </div>
+
 </x-app-layout>

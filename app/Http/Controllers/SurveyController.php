@@ -20,9 +20,7 @@ class SurveyController extends Controller
     {
 
         $organizationId = 1;
-        $surveys = Survey::with('organization')
-            ->where('organization_id', $organizationId)
-            ->get();
+        $surveys = Survey::where('organization_id', $organizationId)->get();
 
         return view('surveys.index', compact('surveys'));
     }
@@ -51,7 +49,6 @@ class SurveyController extends Controller
     {
         $this->authorize('view', $survey);
 
-        $survey->load('organization');
         return view('surveys.show', compact('survey'));
     }
 

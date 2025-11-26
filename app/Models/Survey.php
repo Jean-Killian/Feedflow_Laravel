@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Survey extends Model
 {
-    use HasFactory;
 
     public function surveyQuestion()
     {
@@ -18,6 +17,13 @@ class Survey extends Model
     {
         return $this->hasMany(SurveyAnswer::class);
     }
+
+    public function organisation()
+    {
+        return $this->belongsTo(Organization::class);
+    }
+    
+    use HasFactory;
 
     protected $table    = 'surveys';
     public $timestamps  = true;
