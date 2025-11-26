@@ -27,7 +27,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/organization/store', [OrganizationController::class, 'store'])->name('organization.store');
     Route::patch('/organization/update/{organization}', action: [OrganizationController::class, 'update'])->name('organization.update');
     Route::delete('/organization/delete/{organization}', action: [OrganizationController::class, 'delete'])->name('organization.delete');
-    Route::createOrganizationUser('/organization/user/{organization}', action: [OrganizationController::class, 'createOrganizationUser'])->name('organization.createUser');
+    Route::post('/organization/user/{organization}', action: [OrganizationController::class, 'createOrganizationUser'])->name('organization.createUser');
 });
 
 // Routes surveys
