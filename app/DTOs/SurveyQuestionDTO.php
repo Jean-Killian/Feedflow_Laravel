@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 
 final class SurveyQuestionDTO
 {
+    //constructeur de la question
     public function __construct(
         public int $survey_id,
         public string $title,
@@ -13,6 +14,7 @@ final class SurveyQuestionDTO
         public ?array $options = null,
     ) {}
 
+    //convertis la requete text en dto
     public static function fromRequest(Request $request, int $survey_id): self
     {
         

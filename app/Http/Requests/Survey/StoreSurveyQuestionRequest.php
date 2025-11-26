@@ -6,12 +6,14 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StoreSurveyQuestionRequest extends FormRequest
 {
+    //Autorisation
     public function authorize(): bool
     {
         $survey = $this->route('survey'); 
         return $survey && $this->user()->can('update', $survey);
     }
 
+    //regles des champs
     public function rules(): array
     {
         return [

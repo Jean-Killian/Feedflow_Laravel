@@ -21,6 +21,10 @@ use Illuminate\Support\Facades\Crypt;
 
 class SurveyController extends Controller
 {
+
+    /**
+     * AFFICHE LA LISTE DES SONDAGES
+     */
     public function index()
     {
     $user = auth()->user();
@@ -35,14 +39,16 @@ class SurveyController extends Controller
     return view('surveys.index', compact('surveys'));
     }
 
-
+    /**
+     * CREE UN SONDAGE ( PAGE FORMULAIRE)
+     */
     public function create()
     {
         return view('surveys.create');
     }
 
     /**
-     * 
+     * CREEATION DU SONDAGE
      */
     public function store(StoreSurveyRequest $request)
     {
@@ -55,15 +61,11 @@ class SurveyController extends Controller
         return redirect()->route('surveys.index')->with('success', 'Sondage créé !');
     }
 
+    /**
+     * EDITION D'UN SONDAGE
+     */
 
-    public function show(Survey $survey)
-    {
-        $this->authorize('view', $survey);
-
-        return view('surveys.show', compact('survey'));
-    }
-
-
+    //afficher la page de l'edition
     public function edit(Survey $survey)
     {
         $this->authorize('update', $survey); 
@@ -71,6 +73,7 @@ class SurveyController extends Controller
         return view('surveys.edit', compact('survey'));
     }
 
+    //met a jour la bdd
     public function update(UpdateSurveyRequest $request, Survey $survey)
     {
         $this->authorize('update', $survey); 
@@ -81,7 +84,9 @@ class SurveyController extends Controller
         return redirect()->route('surveys.index')->with('success', 'Sondage mis à jour !');
     }
 
-
+    /**
+     * SUPPRETION D'UN SONDAGE
+     */
     public function destroy(Survey $survey)
     {
         $this->authorize('delete', $survey);
@@ -91,6 +96,9 @@ class SurveyController extends Controller
         return redirect()->route('surveys.index')->with('success', 'Sondage supprimé !');
     }
 
+    /**
+     * AJOUTER UNE QUESTION A UN SONDAGE
+     */
     public function addQuestion(Request $request, Survey $survey)
     {
         $this->authorize('update', $survey);
@@ -102,7 +110,9 @@ class SurveyController extends Controller
             ->with('success', 'Question ajoutée !');
     }
 
-
+    /**
+     * AJOUTER UNE QUESTION A UN SONDAGE (FORMULAIRE)
+     */
     public function addQuestionForm(Survey $survey)
     {
         $this->authorize('update', $survey);
@@ -110,6 +120,9 @@ class SurveyController extends Controller
         return view('surveys.add_question', compact('survey'));
     }
 
+    /**
+     * MODIFIER LES QUESTIONS D'UN SONDAGE
+     */
     public function editQuestions(Survey $survey)
     {
         $this->authorize('update', $survey);
@@ -118,6 +131,9 @@ class SurveyController extends Controller
         return view('surveys.questions.edit', compact('survey', 'questions'));
     }
 
+    /**
+     * PAGE REPONDRE A UN SONDAGE
+     */
     public function takeSurvey(Survey $survey)
     {
         $user = auth()->user();
@@ -135,6 +151,9 @@ class SurveyController extends Controller
         return view('surveys.take', compact('survey'));
     }
 
+    /**
+     * MET A JOUR LES QUESTIONS DU SONDAGE
+     */
     public function updateQuestions(Request $request, Survey $survey)
     {
         $questionsData = $request->input('questions', []);
@@ -143,7 +162,7 @@ class SurveyController extends Controller
             $question = $survey->questions()->find($id);
             if (!$question) continue;
 
-            // Transforme les options en array si ce n'est pas déjà fait
+            // Transforme les options en array 
             $options = $data['options'] ?? [];
             if (is_string($options)) {
                 // par ex. "option1, option2, option3"
@@ -161,7 +180,9 @@ class SurveyController extends Controller
             ->with('success', 'Questions mises à jour !');
     }
 
-
+    /**
+     * SOUMISSION DES REPONSES
+     */
     public function submitSurvey(Request $request, Survey $survey)
     {
         $user = $request->user();
@@ -199,23 +220,23 @@ class SurveyController extends Controller
     
     public function public(string $token)
     {
-        // Decode token (recover survey ID)
+        // Decode le token 
         try {
             $surveyId = Crypt::decryptString($token);
         } catch (\Exception $e) {
             abort(404, "Lien invalide.");
         }
     
-        // Retrieve survey
+        // Recuperer survey
         $survey = Survey::findOrFail($surveyId);
     
-        // Check active period
+        // Check la periode active
         $now = now();
         if (!($now->between($survey->start_date, $survey->end_date))) {
             abort(403, "Ce sondage n'est pas actif.");
         }
     
-        // Display public view
+        // affiche vue public
         return view('surveys.public', compact('survey'));
     }
 }

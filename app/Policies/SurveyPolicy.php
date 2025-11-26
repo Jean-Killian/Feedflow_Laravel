@@ -48,6 +48,9 @@ class SurveyPolicy
          return $user->id === $survey->user_id;
     }
 
+    /**
+     * Determine whether the user can addQuestion to the model.
+     */
     public function addQuestion(User $user, Survey $survey)
     {
         return $user->id === $survey->user_id;
