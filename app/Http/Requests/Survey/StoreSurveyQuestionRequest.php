@@ -8,7 +8,7 @@ class StoreSurveyQuestionRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        $survey = $this->route('survey'); // si tu passes le survey via route
+        $survey = $this->route('survey'); 
         return $survey && $this->user()->can('update', $survey);
     }
 

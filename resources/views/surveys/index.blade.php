@@ -1,56 +1,82 @@
 @extends('layouts.app')
 
 @section('content')
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Dashboard') }}
-        </h2>
-    </x-slot>
+<div class="max-w-4xl mx-auto mt-10">
 
-    <div class="container mx-auto p-4">
-        <h1 class="text-2xl font-bold mb-4">Mes sondages</h1>
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold">📊 Liste des sondages</h1>
 
-        <a href="{{ route('surveys.create') }}" class="bg-blue-500 text-white px-4 py-2 rounded mb-4 inline-block">
-            Créer un nouveau sondage
+        <a href="{{ route('surveys.create') }}"
+           class="bg-green-600 text-black px-4 py-2 rounded hover:bg-green-700">
+            ➕ Nouveau sondage
         </a>
-
-        @if(session('success'))
-            <div class="bg-green-100 text-green-800 p-2 mb-4 rounded">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if($surveys->isEmpty())
-            <p>Aucun sondage trouvé.</p>
-        @else
-            <table class="w-full border border-gray-300">
-                <thead>
-                    <tr class="bg-gray-200">
-                        <th class="p-2 border">Titre</th>
-                        <th class="p-2 border">Début</th>
-                        <th class="p-2 border">Fin</th>
-                        <th class="p-2 border">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($surveys as $survey)
-                        <tr>
-                            <td class="p-2 border">{{ $survey->title }}</td>
-                            <td class="p-2 border">{{ $survey->start_date }}</td>
-                            <td class="p-2 border">{{ $survey->end_date }}</td>
-                            <td class="p-2 border flex gap-2">
-                                <a href="{{ route('surveys.show', $survey) }}" class="text-blue-500">Voir</a>
-                                <a href="{{ route('surveys.edit', $survey) }}" class="text-yellow-500">Modifier</a>
-                                <form action="{{ route('surveys.destroy', $survey) }}" method="POST" onsubmit="return confirm('Supprimer ce sondage ?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-red-500">Supprimer</button>
-                                </form>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        @endif
     </div>
+
+    @foreach($surveys as $survey)
+        @php
+            // Vérifie si l'utilisateur connecté a déjà répondu
+            $hasAnswered = $survey->answers->where('user_id', auth()->id())->count() > 0;
+        @endphp
+
+        <div class="shadow-md rounded-lg p-6 mb-5 border {{ $hasAnswered ? 'bg-green-100' : 'bg-white' }}">
+
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-2xl font-semibold">{{ $survey->title }}</h2>
+                    <p class="text-gray-500 text-sm">
+                        Créé le : {{ $survey->created_at->format('d/m/Y') }}
+                    </p>
+                </div>
+
+                <span class="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded">
+                    Organisation #{{ $survey->organization_id }}
+                </span>
+            </div>
+
+            <p class="mt-3 text-gray-700">
+                {{ Str::limit($survey->description, 120) }}
+            </p>
+
+            <div class="mt-5 flex gap-3">
+
+                {{-- Bouton Répondre --}}
+                @if(!$hasAnswered)
+                    <a href="{{ route('surveys.take', $survey) }}"
+                       class="px-4 py-2 bg-indigo-600 text-black rounded hover:bg-indigo-700">
+                        📝 Répondre
+                    </a>
+                @else
+                    <span class="px-4 py-2 bg-gray-400 text-black rounded">
+                        ✅ Déjà répondu
+                    </span>
+                @endif
+
+                {{-- Bouton Ajouter des questions --}}
+                <a href="{{ route('surveys.add_question', $survey) }}"
+                   class="px-4 py-2 bg-purple-600 text-black rounded hover:bg-purple-700">
+                    ➕ Ajouter question
+                </a>
+
+                {{-- Bouton Modifier --}}
+                <a href="{{ route('surveys.edit', $survey) }}"
+                   class="px-4 py-2 bg-yellow-500 text-black rounded hover:bg-yellow-600">
+                    ✏️ Modifier
+                </a>
+
+                {{-- Bouton Supprimer --}}
+                <form action="{{ route('surveys.destroy', $survey) }}" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <button class="px-4 py-2 bg-red-600 text-black rounded hover:bg-red-700"
+                            onclick="return confirm('Supprimer ce sondage ?')">
+                        🗑 Supprimer
+                    </button>
+                </form>
+
+            </div>
+
+        </div>
+    @endforeach
+
+</div>
 @endsection

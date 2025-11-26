@@ -35,10 +35,14 @@ class Survey extends Model
     'start_date',
     'end_date',
     'is_anonymous',
-];
+    ];
 
     protected $casts = [
-    ];
+    'is_anonymous' => 'boolean',
+    'start_date' => 'date',
+    'end_date' => 'date',
+];
+
 
     public function organization()
     {
@@ -49,4 +53,15 @@ class Survey extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    public function questions()
+    {
+        return $this->hasMany(SurveyQuestion::class);
+    }
+
+    public function answers()
+    {
+        return $this->hasMany(SurveyAnswer::class);
+    }
+
 }
