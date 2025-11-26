@@ -1,5 +1,6 @@
 <?php
 
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,19 +11,26 @@ class SurveyQuestion extends Model
     use HasFactory;
 
     protected $table = 'survey_questions';
+
     protected $fillable = [
         'survey_id',
-        'question',
-        'type',
-        'data', // options JSON pour les questions à choix multiples
+        'title',
+        'question_type',
+        'options', 
     ];
 
     protected $casts = [
-        'data' => 'array', // convertit automatiquement JSON <-> array
+        'options' => 'array', 
     ];
 
     public function survey()
     {
         return $this->belongsTo(Survey::class);
     }
+
+    public function answers()
+    {
+        return $this->hasMany(SurveyAnswer::class);
+    }
+
 }

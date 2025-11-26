@@ -5,11 +5,14 @@ use App\Http\Controllers\ProfileController;
 use App\Models\Organization;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SurveyController;
+//use Illuminate\Support\Facades\Route;
 
+// Page d'accueil
 Route::get('/', function () {
     return view('welcome');
 });
 
+// Dashboard
 Route::get('/dashboard', function () {
     $organizations = Organization::all();
     return view('dashboard', compact('organizations'));

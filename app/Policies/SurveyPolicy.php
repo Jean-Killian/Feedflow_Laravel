@@ -21,7 +21,7 @@ class SurveyPolicy
      */
     public function view(User $user, Survey $survey): bool
     {
-        return false;
+        return true;
     }
 
     /**
