@@ -51,39 +51,42 @@
                     </span>
                 @endif
 
-               {{-- Bouton Ajouter des questions --}}
-                    @can('addQuestion', $survey)
-                        <a href="{{ route('surveys.add_question', $survey) }}"
-                        class="px-4 py-2 bg-purple-600 text-black rounded hover:bg-purple-700">
-                            ➕ Ajouter question
-                        </a>
-                    @endcan
+                {{-- Bouton Ajouter des questions --}}
+                @can('addQuestion', $survey)
+                    <a href="{{ route('surveys.add_question', $survey) }}"
+                    class="px-4 py-2 bg-purple-600 text-black rounded hover:bg-purple-700">
+                        ➕ Ajouter question
+                    </a>
+                @endcan
+                {{-- Bouton Modifier --}}
+                @can('update', $survey)
+                    <a href="{{ route('surveys.edit', $survey) }}"
+                    class="px-4 py-2 bg-yellow-500 text-black rounded hover:bg-yellow-600">
+                        ✏️ Modifier
+                    </a>
+                @endcan
+                {{-- Bouton Supprimer --}}
+                @can('delete', $survey)
+                <form action="{{ route('surveys.destroy', $survey) }}" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <button class="px-4 py-2 bg-red-600 text-black rounded hover:bg-red-700"
+                            onclick="return confirm('Supprimer ce sondage ?')">
+                        🗑 Supprimer
+                    </button>
+                </form>
+                @endcan
 
-                    {{-- Bouton Modifier --}}
-                    @can('update', $survey)
-                        <a href="{{ route('surveys.edit', $survey) }}"
-                        class="px-4 py-2 bg-yellow-500 text-black rounded hover:bg-yellow-600">
-                            ✏️ Modifier
-                        </a>
-                    @endcan
+                @php
+                    $token = Crypt::encryptString($survey->id);
+                @endphp
 
-                    {{-- Bouton Supprimer --}}
-                    @can('delete', $survey)
-                    <form action="{{ route('surveys.destroy', $survey) }}" method="POST">
-                        @csrf
-                        @method('DELETE')
-                        <button class="px-4 py-2 bg-red-600 text-black rounded hover:bg-red-700"
-                                onclick="return confirm('Supprimer ce sondage ?')">
-                            🗑 Supprimer
-                        </button>
-                    </form>
-                    @endcan
-
-
+                <a href="{{ route('surveys.public', $token) }}"
+                   class="px-4 py-2 bg-blue-600 text-black rounded hover:bg-blue-700">
+                    🔗 Partager
+                </a>
             </div>
-
         </div>
     @endforeach
-
 </div>
 @endsection

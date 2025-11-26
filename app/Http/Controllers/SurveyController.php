@@ -13,6 +13,7 @@ use App\DTOs\SurveyQuestionDTO;
 use App\Actions\Survey\StoreSurveyQuestionAction;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request; 
+use Illuminate\Support\Facades\Crypt;
 
 class SurveyController extends Controller
 {
@@ -182,6 +183,27 @@ class SurveyController extends Controller
         Log::error('submitSurvey failed', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
         return redirect()->route('surveys.take', $survey)->with('error', 'Une erreur est survenue lors de l’enregistrement.');
     }
+}
+    public function public(string $token)
+{
+    // Decode token (recover survey ID)
+    try {
+        $surveyId = Crypt::decryptString($token);
+    } catch (\Exception $e) {
+        abort(404, "Lien invalide.");
+    }
+
+    // Retrieve survey
+    $survey = Survey::findOrFail($surveyId);
+
+    // Check active period
+    $now = now();
+    if (!($now->between($survey->start_date, $survey->end_date))) {
+        abort(403, "Ce sondage n'est pas actif.");
+    }
+
+    // Display public view
+    return view('surveys.public', compact('survey'));
 }
 
 
