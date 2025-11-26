@@ -22,6 +22,7 @@ Route::middleware('auth')->group(function () {
 });
 
 // Routes surveys
+// Routes surveys
 Route::middleware('auth')->prefix('surveys')->group(function () {
 
     // CRUD Sondages
@@ -31,7 +32,6 @@ Route::middleware('auth')->prefix('surveys')->group(function () {
     Route::get('/{survey}/edit', [SurveyController::class, 'edit'])->name('surveys.edit');
     Route::put('/{survey}', [SurveyController::class, 'update'])->name('surveys.update');
     Route::delete('/{survey}', [SurveyController::class, 'destroy'])->name('surveys.destroy');
-
 
     // Gestion des questions
     Route::get('/{survey}/questions/create', [SurveyController::class, 'addQuestionForm'])
@@ -44,6 +44,16 @@ Route::middleware('auth')->prefix('surveys')->group(function () {
         ->name('surveys.take');
     Route::post('/{survey}/submit', [SurveyController::class, 'submitSurvey'])
         ->name('surveys.submit');
+
+    // Éditer toutes les questions d’un sondage
+    Route::get('/{survey}/questions/edit', [SurveyController::class, 'editQuestions'])
+    ->name('surveys.questions.edit_question');
+
+    Route::put('/{survey}/questions', [SurveyController::class, 'updateQuestions'])
+        ->name('surveys.questions.update');
+
+
 });
+
 
 require __DIR__.'/auth.php';
