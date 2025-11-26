@@ -37,7 +37,7 @@ class OrganizationPolicy
      */
     public function update(User $user, Organization $organization): bool
     {
-        return false;
+        return $user->id === $organization->user_id;
     }
 
     /**
@@ -45,7 +45,7 @@ class OrganizationPolicy
      */
     public function delete(User $user, Organization $organization): bool
     {
-        return false;
+        return $user->id === $organization->user_id;
     }
 
     /**
