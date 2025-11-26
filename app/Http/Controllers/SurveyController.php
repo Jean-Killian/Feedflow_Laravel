@@ -82,7 +82,7 @@ class SurveyController extends Controller
 
     public function addQuestion(Request $request, Survey $survey)
     {
-        $this->authorize('update', $survey);
+        $this->authorize('addQuestion', $survey);
 
         $dto = SurveyQuestionDTO::fromRequest($request, $survey->id);
         app(StoreSurveyQuestionAction::class)->execute($dto);
@@ -94,7 +94,7 @@ class SurveyController extends Controller
 
     public function addQuestionForm(Survey $survey)
     {
-        $this->authorize('update', $survey);
+        $this->authorize('addQuestion', $survey);
 
         return view('surveys.add_question', compact('survey'));
     }
