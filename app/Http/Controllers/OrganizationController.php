@@ -18,17 +18,22 @@ class OrganizationController extends Controller
      * Enregistre une nouvelle Organization
      * Utilise une FormRequest, un DTO et une Action
      */
-    public function store(StoreOrganization $request, StoreOrganizationAction $action): JsonResponse
+    public function store(StoreOrganization $request, StoreOrganizationAction $action)
     {
         $dto = OrganizationDTO::fromRequest($request);
     
         $organization = $action->execute($dto);
 
+        // Si la requête attend du JSON, retourner JSON
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Created Organization successfully.',
+                'data'    => $organization,
+            ], 201);
+        }
 
-        return response()->json([
-            'message' => 'Created Organization successfully.',
-            'data'    => $organization,
-        ], 201);
+        // Sinon, rediriger vers le dashboard
+        return redirect()->route('dashboard')->with('success', 'Organisation créée avec succès.');
     }
 
     public function update(UpdateOrganization $request, UpdateOrganizationAction $action, Organization $organization): JsonResponse
