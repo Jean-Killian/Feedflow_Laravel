@@ -4,7 +4,7 @@
         <ul class="space-y-1">
             @forelse($organizations ?? [] as $org)
                 <li>
-                    <a href="{{ url('organizations/'.$org->id) }}" class="block px-2 py-2 rounded hover:bg-gray-100 text-sm">{{ $org->name }}</a>
+                    <a href="{{ route('surveys.index', ['organization_id' => $org->id]) }}" class="block px-2 py-2 rounded hover:bg-gray-100 text-sm">{{ $org->name }}</a>
                 </li>
             @empty
                 <li class="text-sm text-gray-500">Aucune organisation</li>

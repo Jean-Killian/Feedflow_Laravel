@@ -21,10 +21,26 @@ use Illuminate\Support\Facades\Crypt;
 
 class SurveyController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
     $user = auth()->user();
-    $surveys = Survey::with('answers')->where('organization_id', 1)->get();
+    $organizationId = $request->get('organization_id');
+    
+    // Vérifier que l'organization_id est fourni
+    if (!$organizationId) {
+        abort(400, 'Aucune organisation sélectionnée.');
+    }
+    
+    // Vérifier que l'organisation existe
+    $organization = \App\Models\Organization::find($organizationId);
+    if (!$organization) {
+        abort(404, 'Organisation introuvable.');
+    }
+    
+    // Filtrer les sondages par organisation
+    $surveys = Survey::with('answers')
+        ->where('organization_id', $organizationId)
+        ->get();
 
     foreach ($surveys as $survey) {
         $survey->hasAnswered = $survey->answers->contains(function($answer) use ($user) {
@@ -32,27 +48,29 @@ class SurveyController extends Controller
         });
     }
 
-    return view('surveys.index', compact('surveys'));
+    return view('surveys.index', compact('surveys', 'organization'));
     }
 
 
-    public function create()
+    public function create(Request $request)
     {
-        return view('surveys.create');
+        $organizationId = $request->get('organization_id');
+        
+        $organization = \App\Models\Organization::find($organizationId);
+
+        return view('surveys.create', compact('organization'));
     }
 
-    /**
-     * 
-     */
+    
     public function store(StoreSurveyRequest $request)
     {
         $this->authorize('create', Survey::class);
 
-        // Crée le DTO avec organisation 1
         $dto = SurveyDTO::fromRequest($request);
         $survey = app(StoreSurveyAction::class)->execute($dto);
 
-        return redirect()->route('surveys.index')->with('success', 'Sondage créé !');
+        return redirect()->route('surveys.index', ['organization_id' => $request->organization_id])
+            ->with('success', 'Sondage créé !');
     }
 
 

@@ -6,7 +6,7 @@
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold">📊 Liste des sondages</h1>
 
-        <a href="{{ route('surveys.create') }}"
+        <a href="{{ route('surveys.create', ['organization_id' => request('organization_id')]) }}"
            class="bg-green-600 text-black px-4 py-2 rounded hover:bg-green-700">
             ➕ Nouveau sondage
         </a>
