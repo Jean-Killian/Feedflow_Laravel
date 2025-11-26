@@ -89,9 +89,16 @@
                     </form>
                 @endcan
 
+                @php
+                    $token = Crypt::encryptString($survey->id);
+                @endphp
+
+                <a href="{{ route('surveys.public', $token) }}"
+                   class="px-4 py-2 bg-blue-600 text-black rounded hover:bg-blue-700">
+                    🔗 Partager
+                </a>
             </div>
         </div>
     @endforeach
-
 </div>
 @endsection

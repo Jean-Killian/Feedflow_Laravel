@@ -12,12 +12,12 @@ use App\Http\Requests\Survey\StoreSurveyQuestionRequest;
 use App\DTOs\SurveyQuestionDTO;
 use App\Actions\Survey\StoreSurveyQuestionAction;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request; 
+use Illuminate\Http\Request;
 use App\Models\SurveyQuestion;
 use Illuminate\Support\Facades\Log;
 use App\Models\SurveyAnswer;
-use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\DB; 
+use Illuminate\Support\Facades\Crypt;
 
 class SurveyController extends Controller
 {
@@ -175,28 +175,40 @@ public function submitSurvey(Request $request, Survey $survey)
 
     $answers = $request->input('answers', []);
 
-    foreach ($survey->questions as $question) {
-        $answerValue = $answers[$question->id] ?? null;
-        if ($answerValue === null) continue;
+        foreach ($survey->questions as $question) {
+            $raw = $answers[$question->id] ?? null;
+            if ($raw === null || $raw === '') {
+                // skip empty answers
+                continue;
+            }
 
-        if (is_array($answerValue)) {
-            $answerValue = json_encode($answerValue);
+            $value = is_array($raw) ? json_encode($raw) : (string)$raw;
+
+            $answer = SurveyAnswer::create([
+                'user_id' => $userId,
+                'survey_question_id' => $question->id,
+                'answer' => $value,
+                'survey_id' => $survey->id,
+            ]);
+
+            if ($answer) $inserted++;
         }
 
-        \DB::table('survey_answers')->insert([
-            'user_id' => $userId,
-            'survey_question_id' => $question->id,
-            'answer' => $answerValue,
-            'survey_id' => $survey->id,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        DB::commit();
+
+        Log::info('submitSurvey completed', ['inserted' => $inserted]);
+
+        if ($inserted === 0) {
+            return redirect()->route('surveys.take', $survey)->with('warning', 'Aucune réponse enregistrée (rien de sélectionné).');
+        }
+
+        return redirect()->route('surveys.index')->with('success', 'Sondage répondu !');
+    } catch (\Throwable $e) {
+        DB::rollBack();
+        Log::error('submitSurvey failed', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+        return redirect()->route('surveys.take', $survey)->with('error', 'Une erreur est survenue lors de l’enregistrement.');
     }
-
-    return redirect()->route('surveys.index')
-        ->with('success', 'Sondage répondu !');
 }
-
 
 
 }
