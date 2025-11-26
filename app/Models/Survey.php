@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Survey extends Model
 {
 
-    public function surveyQuestion()
+    /*public function surveyQuestion()
     {
         return $this->hasMany(SurveyQuestion::class);
     }
@@ -21,7 +21,7 @@ class Survey extends Model
     public function organisation()
     {
         return $this->belongsTo(Organization::class);
-    }
+    }*/
     
     use HasFactory;
 

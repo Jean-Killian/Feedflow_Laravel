@@ -5,7 +5,7 @@ use App\Http\Controllers\ProfileController;
 use App\Models\Organization;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SurveyController;
-use Illuminate\Support\Facades\Route;
+//use Illuminate\Support\Facades\Route;
 
 // Page d'accueil
 Route::get('/', function () {
