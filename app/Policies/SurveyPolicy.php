@@ -37,8 +37,7 @@ class SurveyPolicy
      */
     public function update(User $user, Survey $survey): bool
     {
-        return $survey->user_id === $user->id
-            || $user->isAdminOf($survey->organization);
+         return $user->id === $survey->user_id;
     }
 
     /**
@@ -46,10 +45,13 @@ class SurveyPolicy
      */
     public function delete(User $user, Survey $survey)
     {
-        return $survey->user_id === $user->id
-            || $user->isAdminOf($survey->organization);
+         return $user->id === $survey->user_id;
     }
 
+    public function addQuestion(User $user, Survey $survey)
+    {
+        return $user->id === $survey->user_id;
+    }
 
     /**
      * Determine whether the user can restore the model.

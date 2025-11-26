@@ -23,10 +23,11 @@
             <input type="date" name="end_date" id="end_date" class="border p-2 w-full" required>
         </div>
         <div class="mb-4">
-            <label class="inline-flex items-center">
-                <input type="checkbox" name="is_anonymous" class="form-checkbox">
-                <span class="ml-2">Sondage anonyme</span>
+            <label class="flex items-center gap-2">
+                <input type="checkbox" name="is_anonymous" value="1">
+                Sondage anonyme
             </label>
+
         </div>
         <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Créer</button>
     </form>
