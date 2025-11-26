@@ -12,18 +12,29 @@ use App\Http\Requests\Survey\StoreSurveyQuestionRequest;
 use App\DTOs\SurveyQuestionDTO;
 use App\Actions\Survey\StoreSurveyQuestionAction;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request; 
+use Illuminate\Http\Request;
+use App\Models\SurveyQuestion;
+use Illuminate\Support\Facades\Log;
+use App\Models\SurveyAnswer;
+use Illuminate\Support\Facades\DB; 
+use Illuminate\Support\Facades\Crypt;
 
 class SurveyController extends Controller
 {
     public function index()
     {
+    $user = auth()->user();
+    $surveys = Survey::with('answers')->where('organization_id', 1)->get();
 
-        $organizationId = 1;
-        $surveys = Survey::where('organization_id', $organizationId)->get();
-
-        return view('surveys.index', compact('surveys'));
+    foreach ($surveys as $survey) {
+        $survey->hasAnswered = $survey->answers->contains(function($answer) use ($user) {
+            return $answer->user_id === $user->id || $answer->user_id === null;
+        });
     }
+
+    return view('surveys.index', compact('surveys'));
+    }
+
 
     public function create()
     {
@@ -99,9 +110,19 @@ class SurveyController extends Controller
         return view('surveys.add_question', compact('survey'));
     }
 
+    public function editQuestions(Survey $survey)
+    {
+        $this->authorize('update', $survey);
+
+        $questions = $survey->questions; // récupère toutes les questions
+        return view('surveys.questions.edit', compact('survey', 'questions'));
+    }
+
     public function takeSurvey(Survey $survey)
     {
         $user = auth()->user();
+        $survey->load('questions'); 
+        return view('surveys.take', compact('survey'));
 
         // Vérifie si l'utilisateur a déjà répondu à ce sondage
         $hasAnswered = $survey->answers()->where('user_id', $user->id)->exists();
@@ -114,12 +135,40 @@ class SurveyController extends Controller
         return view('surveys.take', compact('survey'));
     }
 
+    public function updateQuestions(Request $request, Survey $survey)
+    {
+        $questionsData = $request->input('questions', []);
+
+        foreach ($questionsData as $id => $data) {
+            $question = $survey->questions()->find($id);
+            if (!$question) continue;
+
+            // Transforme les options en array si ce n'est pas déjà fait
+            $options = $data['options'] ?? [];
+            if (is_string($options)) {
+                // par ex. "option1, option2, option3"
+                $options = array_map('trim', explode(',', $options));
+            }
+
+            $question->update([
+                'title' => $data['title'],
+                'question_type' => $data['question_type'],
+                'options' => $options, // Laravel castera en JSON
+            ]);
+        }
+
+        return redirect()->route('surveys.index')
+            ->with('success', 'Questions mises à jour !');
+    }
+
 
     public function submitSurvey(Request $request, Survey $survey)
     {
         $user = $request->user();
+        $userId = $request->has('respond_anonymously') ? null : $user->id;
 
-        if ($survey->answers()->where('user_id', $user->id)->exists()) {
+        // Vérifie si l'utilisateur connecté a déjà répondu (uniquement si pas anonyme)
+        if ($userId && $survey->answers()->where('user_id', $userId)->exists()) {
             return redirect()->route('surveys.index')
                 ->with('info', 'Vous avez déjà répondu à ce sondage.');
         }
@@ -135,7 +184,7 @@ class SurveyController extends Controller
             }
 
             \DB::table('survey_answers')->insert([
-                'user_id' => $user->id,
+                'user_id' => $userId,
                 'survey_question_id' => $question->id,
                 'answer' => $answerValue,
                 'survey_id' => $survey->id,
@@ -147,8 +196,30 @@ class SurveyController extends Controller
         return redirect()->route('surveys.index')
             ->with('success', 'Sondage répondu !');
     }
-
-
-
+    
+    public function public(string $token)
+    {
+        // Decode token (recover survey ID)
+        try {
+            $surveyId = Crypt::decryptString($token);
+        } catch (\Exception $e) {
+            abort(404, "Lien invalide.");
+        }
+    
+        // Retrieve survey
+        $survey = Survey::findOrFail($surveyId);
+    
+        // Check active period
+        $now = now();
+        if (!($now->between($survey->start_date, $survey->end_date))) {
+            abort(403, "Ce sondage n'est pas actif.");
+        }
+    
+        // Display public view
+        return view('surveys.public', compact('survey'));
+    }
 }
+
+
+
 

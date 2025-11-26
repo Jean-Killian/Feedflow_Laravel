@@ -9,28 +9,39 @@
         @csrf
 
         @foreach($survey->questions as $question)
-    <div class="mb-6 p-4 border rounded">
-        <h3 class="font-semibold">{{ $question->title }}</h3>
+            <div class="mb-6 p-4 border rounded shadow-sm">
+                <h3 class="font-semibold mb-2">{{ $question->title }}</h3>
 
-        @if($question->question_type === 'text')
-            <textarea name="answers[{{ $question->id }}]" class="border p-2 w-full mt-2"></textarea>
-        @elseif(in_array($question->question_type, ['radio', 'checkbox']))
-            @foreach($question->options as $option)
-                <label class="block mt-2">
-                    <input type="{{ $question->question_type }}" 
-                           name="answers[{{ $question->id }}]{{ $question->question_type === 'checkbox' ? '[]' : '' }}"
-                           value="{{ $option }}" class="mr-2">
-                    {{ $option }}
+                @if($question->question_type === 'text')
+                    <textarea name="answers[{{ $question->id }}]" class="border p-2 w-full mt-2 rounded" rows="3"></textarea>
+
+                @elseif(in_array($question->question_type, ['radio', 'checkbox']))
+                    @foreach($question->options as $option)
+                        <label class="block mt-2 cursor-pointer">
+                            <input type="{{ $question->question_type }}" 
+                                   name="answers[{{ $question->id }}]{{ $question->question_type === 'checkbox' ? '[]' : '' }}"
+                                   value="{{ $option }}" class="mr-2">
+                            {{ $option }}
+                        </label>
+                    @endforeach
+
+                @elseif($question->question_type === 'scale')
+                    <input type="range" name="answers[{{ $question->id }}]" min="1" max="10" class="w-full mt-2">
+                @endif
+            </div>
+        @endforeach
+
+        {{-- Checkbox pour répondre anonymement si le sondage le permet --}}
+  
+            <div class="mb-6">
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" name="respond_anonymously" value="1" class="form-checkbox">
+                    Répondre anonymement
                 </label>
-            @endforeach
-        @elseif($question->question_type === 'scale')
-            <input type="range" name="answers[{{ $question->id }}]" min="1" max="10">
-        @endif
-    </div>
-@endforeach
+            </div>
 
 
-        <button class="bg-blue-500 text-black px-4 py-2 rounded">
+        <button type="submit" class="bg-blue-500 text-black px-4 py-2 rounded hover:bg-blue-600">
             Envoyer mes réponses
         </button>
     </form>

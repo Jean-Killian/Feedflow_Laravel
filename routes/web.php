@@ -29,23 +29,40 @@ Route::middleware('auth')->group(function () {
     Route::delete('/organization/delete/{organization}', action: [OrganizationController::class, 'delete'])->name('organization.delete');
 });
 
-Route::middleware('auth')->group(function () {
-    Route::get('/surveys', [SurveyController::class, 'index'])->name('surveys.index');
-    Route::get('/surveys/create', [SurveyController::class, 'create'])->name('surveys.create');
-    Route::post('/surveys', [SurveyController::class, 'store'])->name('surveys.store');
-    Route::get('/surveys/{survey}', [SurveyController::class, 'show'])->name('surveys.show');
-    Route::get('/surveys/{survey}/edit', [SurveyController::class, 'edit'])->name('surveys.edit');
-    Route::put('/surveys/{survey}', [SurveyController::class, 'update'])->name('surveys.update');
-    Route::delete('/surveys/{survey}', [SurveyController::class, 'destroy'])->name('surveys.destroy');
+// Routes surveys
+Route::middleware('auth')->prefix('surveys')->group(function () {
+
+    // CRUD Sondages
+    Route::get('/', [SurveyController::class, 'index'])->name('surveys.index');
+    Route::get('/create', [SurveyController::class, 'create'])->name('surveys.create');
+    Route::post('/', [SurveyController::class, 'store'])->name('surveys.store');
+    Route::get('/{survey}/edit', [SurveyController::class, 'edit'])->name('surveys.edit');
+    Route::put('/{survey}', [SurveyController::class, 'update'])->name('surveys.update');
+    Route::delete('/{survey}', [SurveyController::class, 'destroy'])->name('surveys.destroy');
+
+
+    // Gestion des questions
+    Route::get('/{survey}/questions/create', [SurveyController::class, 'addQuestionForm'])
+        ->name('surveys.add_question');
+    Route::post('/{survey}/questions', [SurveyController::class, 'addQuestion'])
+        ->name('surveys.store_question');
+
+    // Participer / répondre au sondage
+    Route::get('/{survey}/take', [SurveyController::class, 'takeSurvey'])
+        ->name('surveys.take');
+    Route::post('/{survey}/submit', [SurveyController::class, 'submitSurvey'])
+        ->name('surveys.submit');
+    
+    // Éditer toutes les questions d’un sondage
+    Route::get('/{survey}/questions/edit', [SurveyController::class, 'editQuestions'])
+    ->name('surveys.questions.edit_question');
+
+    Route::put('/{survey}/questions', [SurveyController::class, 'updateQuestions'])
+        ->name('surveys.questions.update');
 });
 
-Route::post('/surveys/{survey}/questions', [SurveyController::class, 'addQuestion'])->name('surveys.questions.store');
-
-Route::middleware('auth')->group(function () {
-    Route::resource('surveys', SurveyController::class);
-});
-
-Route::get('/surveys/create', [SurveyController::class, 'create'])->name('surveys.create');
-Route::post('/surveys', [SurveyController::class, 'store'])->name('surveys.store');
+// Public access with token
+Route::get('/survey/{token}', [SurveyController::class, 'public'])
+->name('surveys.public');
 
 require __DIR__.'/auth.php';

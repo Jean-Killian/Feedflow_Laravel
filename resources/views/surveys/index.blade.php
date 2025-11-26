@@ -37,10 +37,10 @@
                 {{ Str::limit($survey->description, 120) }}
             </p>
 
-            <div class="mt-5 flex gap-3">
+            <div class="mt-5 flex gap-3 flex-wrap">
 
                 {{-- Bouton Répondre --}}
-                @if(!$hasAnswered)
+                @if(!$survey->hasAnswered)
                     <a href="{{ route('surveys.take', $survey) }}"
                        class="px-4 py-2 bg-indigo-600 text-black rounded hover:bg-indigo-700">
                         📝 Répondre
@@ -51,32 +51,54 @@
                     </span>
                 @endif
 
-                {{-- Bouton Ajouter des questions --}}
-                <a href="{{ route('surveys.add_question', $survey) }}"
-                   class="px-4 py-2 bg-purple-600 text-black rounded hover:bg-purple-700">
-                    ➕ Ajouter question
+                {{-- Ajouter des questions --}}
+                @can('addQuestion', $survey)
+                    <a href="{{ route('surveys.add_question', $survey) }}"
+                       class="px-4 py-2 bg-purple-600 text-black rounded hover:bg-purple-700">
+                        ➕ Ajouter question
+                    </a>
+                @endcan
+
+                {{-- Modifier toutes les questions (un seul bouton) --}}
+                @if($survey->questions && $survey->questions->count())
+                    @can('update', $survey)
+                        <a href="{{ route('surveys.questions.edit_question', $survey) }}"
+                           class="px-4 py-2 bg-purple-700 text-black rounded hover:bg-purple-800">
+                            🛠 Modifier les questions
+                        </a>
+                    @endcan
+                @endif
+
+                {{-- Modifier le sondage --}}
+                @can('update', $survey)
+                    <a href="{{ route('surveys.edit', $survey) }}"
+                       class="px-4 py-2 bg-yellow-500 text-black rounded hover:bg-yellow-600">
+                        ✏️ Modifier
+                    </a>
+                @endcan
+
+                {{-- Supprimer --}}
+                @can('delete', $survey)
+                    <form action="{{ route('surveys.destroy', $survey) }}" method="POST" class="inline-block">
+                        @csrf
+                        @method('DELETE')
+                        <button class="px-4 py-2 bg-red-600 text-black rounded hover:bg-red-700"
+                                onclick="return confirm('Supprimer ce sondage ?')">
+                            🗑 Supprimer
+                        </button>
+                    </form>
+                @endcan
+
+                @php
+                    $token = Crypt::encryptString($survey->id);
+                @endphp
+
+                <a href="{{ route('surveys.public', $token) }}"
+                   class="px-4 py-2 bg-blue-600 text-black rounded hover:bg-blue-700">
+                    🔗 Partager
                 </a>
-
-                {{-- Bouton Modifier --}}
-                <a href="{{ route('surveys.edit', $survey) }}"
-                   class="px-4 py-2 bg-yellow-500 text-black rounded hover:bg-yellow-600">
-                    ✏️ Modifier
-                </a>
-
-                {{-- Bouton Supprimer --}}
-                <form action="{{ route('surveys.destroy', $survey) }}" method="POST">
-                    @csrf
-                    @method('DELETE')
-                    <button class="px-4 py-2 bg-red-600 text-black rounded hover:bg-red-700"
-                            onclick="return confirm('Supprimer ce sondage ?')">
-                        🗑 Supprimer
-                    </button>
-                </form>
-
             </div>
-
         </div>
     @endforeach
-
 </div>
 @endsection

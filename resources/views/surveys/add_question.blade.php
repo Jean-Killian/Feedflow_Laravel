@@ -33,7 +33,7 @@
 
             <!-- Bouton -->
             <button type="submit"
-                    class="bg-green-500 hover:bg-green-600 text-white font-bold px-6 py-3 rounded-md shadow-md w-full transition">
+                    class="bg-green-500 hover:bg-green-600 text-black font-bold px-6 py-3 rounded-md shadow-md w-full transition">
                 Ajouter la question
             </button>
         </form>
