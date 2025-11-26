@@ -63,7 +63,7 @@ Route::middleware('auth')->prefix('surveys')->group(function () {
 });
 
 // Public access with token
-Route::get('/survey/{token}', [SurveyController::class, 'public'])
+Route::get('/survey/{token}', [SurveyController::class, 'showPublicSurvey'])
 ->name('surveys.public');
 
 require __DIR__.'/auth.php';

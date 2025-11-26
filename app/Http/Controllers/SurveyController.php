@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Log;
 use App\Models\SurveyAnswer;
 use Illuminate\Support\Facades\DB; 
 use Illuminate\Support\Facades\Crypt;
+use App\Actions\Survey\GetPublicSurveyAction;
 
 class SurveyController extends Controller
 {
@@ -217,28 +218,14 @@ class SurveyController extends Controller
         return redirect()->route('surveys.index')
             ->with('success', 'Sondage répondu !');
     }
-    
-    public function public(string $token)
+
+    public function showPublicSurvey(string $token, GetPublicSurveyAction $action)
     {
-        // Decode le token 
-        try {
-            $surveyId = Crypt::decryptString($token);
-        } catch (\Exception $e) {
-            abort(404, "Lien invalide.");
-        }
-    
-        // Recuperer survey
-        $survey = Survey::findOrFail($surveyId);
-    
-        // Check la periode active
-        $now = now();
-        if (!($now->between($survey->start_date, $survey->end_date))) {
-            abort(403, "Ce sondage n'est pas actif.");
-        }
-    
-        // affiche vue public
+        $survey = $action->execute($token);
+
         return view('surveys.public', compact('survey'));
     }
+
 }
 
 
