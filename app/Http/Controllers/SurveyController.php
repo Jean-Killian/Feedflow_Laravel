@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\Crypt;
 class SurveyController extends Controller
 {
     public function index()
-{
+    {
     $user = auth()->user();
     $surveys = Survey::with('answers')->where('organization_id', 1)->get();
 
@@ -33,7 +33,7 @@ class SurveyController extends Controller
     }
 
     return view('surveys.index', compact('surveys'));
-}
+    }
 
 
     public function create()
@@ -162,54 +162,64 @@ class SurveyController extends Controller
     }
 
 
-public function submitSurvey(Request $request, Survey $survey)
-{
-    $user = $request->user();
-    $userId = $request->has('respond_anonymously') ? null : $user->id;
+    public function submitSurvey(Request $request, Survey $survey)
+    {
+        $user = $request->user();
+        $userId = $request->has('respond_anonymously') ? null : $user->id;
 
-    // Vérifie si l'utilisateur connecté a déjà répondu (uniquement si pas anonyme)
-    if (!$userId && $survey->answers()->where('user_id', $userId)->exists()) {
-        return redirect()->route('surveys.index')
-            ->with('info', 'Vous avez déjà répondu à ce sondage.');
-    }
+        // Vérifie si l'utilisateur connecté a déjà répondu (uniquement si pas anonyme)
+        if ($userId && $survey->answers()->where('user_id', $userId)->exists()) {
+            return redirect()->route('surveys.index')
+                ->with('info', 'Vous avez déjà répondu à ce sondage.');
+        }
 
-    $answers = $request->input('answers', []);
+        $answers = $request->input('answers', []);
 
         foreach ($survey->questions as $question) {
-            $raw = $answers[$question->id] ?? null;
-            if ($raw === null || $raw === '') {
-                // skip empty answers
-                continue;
+            $answerValue = $answers[$question->id] ?? null;
+            if ($answerValue === null) continue;
+
+            if (is_array($answerValue)) {
+                $answerValue = json_encode($answerValue);
             }
 
-            $value = is_array($raw) ? json_encode($raw) : (string)$raw;
-
-            $answer = SurveyAnswer::create([
+            \DB::table('survey_answers')->insert([
                 'user_id' => $userId,
                 'survey_question_id' => $question->id,
-                'answer' => $value,
+                'answer' => $answerValue,
                 'survey_id' => $survey->id,
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
-
-            if ($answer) $inserted++;
         }
 
-        DB::commit();
-
-        Log::info('submitSurvey completed', ['inserted' => $inserted]);
-
-        if ($inserted === 0) {
-            return redirect()->route('surveys.take', $survey)->with('warning', 'Aucune réponse enregistrée (rien de sélectionné).');
+        return redirect()->route('surveys.index')
+            ->with('success', 'Sondage répondu !');
+    }
+    
+    public function public(string $token)
+    {
+        // Decode token (recover survey ID)
+        try {
+            $surveyId = Crypt::decryptString($token);
+        } catch (\Exception $e) {
+            abort(404, "Lien invalide.");
         }
-
-        return redirect()->route('surveys.index')->with('success', 'Sondage répondu !');
-    } catch (\Throwable $e) {
-        DB::rollBack();
-        Log::error('submitSurvey failed', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
-        return redirect()->route('surveys.take', $survey)->with('error', 'Une erreur est survenue lors de l’enregistrement.');
+    
+        // Retrieve survey
+        $survey = Survey::findOrFail($surveyId);
+    
+        // Check active period
+        $now = now();
+        if (!($now->between($survey->start_date, $survey->end_date))) {
+            abort(403, "Ce sondage n'est pas actif.");
+        }
+    
+        // Display public view
+        return view('surveys.public', compact('survey'));
     }
 }
 
 
-}
+
 
