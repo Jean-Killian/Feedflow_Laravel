@@ -22,14 +22,19 @@ use Illuminate\Support\Facades\DB;
 class SurveyController extends Controller
 {
     public function index()
-    {
+{
+    $user = auth()->user();
+    $surveys = Survey::with('answers')->where('organization_id', 1)->get();
 
-        $organizationId = 1;
-        $surveys = Survey::with('questions')->where('organization_id', $organizationId)->get();
-
-
-        return view('surveys.index', compact('surveys'));
+    foreach ($surveys as $survey) {
+        $survey->hasAnswered = $survey->answers->contains(function($answer) use ($user) {
+            return $answer->user_id === $user->id || $answer->user_id === null;
+        });
     }
+
+    return view('surveys.index', compact('surveys'));
+}
+
 
     public function create()
     {
@@ -159,17 +164,11 @@ class SurveyController extends Controller
 
 public function submitSurvey(Request $request, Survey $survey)
 {
-    // Récupère l'utilisateur actuel
     $user = $request->user();
-    
-    // Pour sondage anonyme, pas de user_id
-    $userId = $survey->is_anonymous ? null : $user->id;
+    $userId = $request->has('respond_anonymously') ? null : $user->id;
 
-    // Vérifie si l'utilisateur a déjà répondu (uniquement si non anonyme)
-    if (!$survey->is_anonymous && SurveyAnswer::where('survey_id', $survey->id)
-        ->where('user_id', $user->id)
-        ->exists()
-    ) {
+    // Vérifie si l'utilisateur connecté a déjà répondu (uniquement si pas anonyme)
+    if (!$userId && $survey->answers()->where('user_id', $userId)->exists()) {
         return redirect()->route('surveys.index')
             ->with('info', 'Vous avez déjà répondu à ce sondage.');
     }
@@ -177,34 +176,27 @@ public function submitSurvey(Request $request, Survey $survey)
     $answers = $request->input('answers', []);
 
     foreach ($survey->questions as $question) {
-
-        // Récupère la réponse envoyée pour cette question
         $answerValue = $answers[$question->id] ?? null;
+        if ($answerValue === null) continue;
 
-        // Ignore si aucune réponse
-        if ($answerValue === null) {
-            continue;
-        }
-
-        // Si la réponse est un tableau (checkbox, QCM multiple), convertit en JSON
         if (is_array($answerValue)) {
             $answerValue = json_encode($answerValue);
         }
 
-        // Insère dans la table survey_answers
-        DB::table('survey_answers')->insert([
+        \DB::table('survey_answers')->insert([
             'user_id' => $userId,
             'survey_question_id' => $question->id,
-            'survey_id' => $survey->id,
             'answer' => $answerValue,
+            'survey_id' => $survey->id,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
     }
 
     return redirect()->route('surveys.index')
-        ->with('success', 'Merci ! Votre sondage a été enregistré.');
+        ->with('success', 'Sondage répondu !');
 }
+
 
 
 }

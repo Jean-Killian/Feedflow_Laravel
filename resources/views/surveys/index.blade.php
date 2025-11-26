@@ -40,7 +40,7 @@
             <div class="mt-5 flex gap-3 flex-wrap">
 
                 {{-- Bouton Répondre --}}
-                @if(!$hasAnswered)
+                @if(!$survey->hasAnswered)
                     <a href="{{ route('surveys.take', $survey) }}"
                        class="px-4 py-2 bg-indigo-600 text-black rounded hover:bg-indigo-700">
                         📝 Répondre
