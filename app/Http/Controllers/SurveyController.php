@@ -13,12 +13,9 @@ use App\DTOs\SurveyQuestionDTO;
 use App\Actions\Survey\StoreSurveyQuestionAction;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\SurveyQuestion;
-use Illuminate\Support\Facades\Log;
-use App\Models\SurveyAnswer;
-use Illuminate\Support\Facades\DB; 
-use Illuminate\Support\Facades\Crypt;
 use App\Actions\Survey\GetPublicSurveyAction;
+use App\Actions\Survey\StoreSurveyAnswerAction;
+use App\DTOs\SurveyAnswerDTO;
 
 class SurveyController extends Controller
 {
@@ -182,14 +179,14 @@ class SurveyController extends Controller
     }
 
     /**
-     * SOUMISSION DES REPONSES
+     * Submit survey answers.
      */
-    public function submitSurvey(Request $request, Survey $survey)
+    public function submitSurvey(Request $request, Survey $survey, StoreSurveyAnswerAction $storeAction)
     {
-        $user = $request->user();
-        $userId = $request->has('respond_anonymously') ? null : $user->id;
+        $userId = $request->has('respond_anonymously') 
+            ? null 
+            : $request->user()->id;
 
-        // Vérifie si l'utilisateur connecté a déjà répondu (uniquement si pas anonyme)
         if ($userId && $survey->answers()->where('user_id', $userId)->exists()) {
             return redirect()->route('surveys.index')
                 ->with('info', 'Vous avez déjà répondu à ce sondage.');
@@ -198,21 +195,12 @@ class SurveyController extends Controller
         $answers = $request->input('answers', []);
 
         foreach ($survey->questions as $question) {
-            $answerValue = $answers[$question->id] ?? null;
-            if ($answerValue === null) continue;
-
-            if (is_array($answerValue)) {
-                $answerValue = json_encode($answerValue);
+            if (!isset($answers[$question->id])) {
+                continue;
             }
 
-            \DB::table('survey_answers')->insert([
-                'user_id' => $userId,
-                'survey_question_id' => $question->id,
-                'answer' => $answerValue,
-                'survey_id' => $survey->id,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            $dto = SurveyAnswerDTO::fromRequest($request, $survey, $question->id, $userId);
+            $storeAction->execute($dto);
         }
 
         return redirect()->route('surveys.index')
