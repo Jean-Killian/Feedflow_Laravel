@@ -14,8 +14,7 @@ Route::get('/', function () {
 
 // Dashboard
 Route::get('/dashboard', function () {
-    $organizations = Organization::all();
-    return view('dashboard', compact('organizations'));
+    return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 

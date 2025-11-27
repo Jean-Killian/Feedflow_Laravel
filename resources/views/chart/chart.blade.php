@@ -10,11 +10,11 @@
     <div class="bg-white shadow rounded-lg p-6 mb-6">
         <div class="flex gap-6">
             <div class="flex-1">
-                <h3 class="text-sm font-semibold mb-3">participation par question</h3>
+                <h3 class="text-sm font-semibold mb-3">Réponses dans le temps</h3>
                 <canvas id="participationChart" style="max-height: 200px;"></canvas>
             </div>
             <div class="flex-1">
-                <h3 class="text-sm font-semibold mb-3">types de questions</h3>
+                <h3 class="text-sm font-semibold mb-3">Types de questions</h3>
                 <canvas id="distributionChart" style="max-height: 200px;"></canvas>
             </div>
         </div>
@@ -86,26 +86,49 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+    // Graphique 1: Réponses dans le temps
+    @php
+        $answersByDate = $survey->answers
+            ->groupBy(function($answer) {
+                return $answer->created_at->format('Y-m-d');
+            })
+            ->map->count()
+            ->sortKeys();
+    @endphp
+    
     const participationCtx = document.getElementById('participationChart').getContext('2d');
     new Chart(participationCtx, {
-        type: 'bar',
+        type: 'line',
         data: {
-            labels: [@foreach($survey->questions as $question)"{{ Str::limit($question->title, 20) }}",@endforeach],
+            labels: [@foreach($answersByDate as $date => $count)"{{ \Carbon\Carbon::parse($date)->format('d/m') }}",@endforeach],
             datasets: [{
-                label: 'Réponses',
-                data: [@foreach($survey->questions as $question){{ $question->answers->count() }},@endforeach],
-                backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                label: 'Nombre de réponses',
+                data: [@foreach($answersByDate as $date => $count){{ $count }},@endforeach],
+                backgroundColor: 'rgba(59, 130, 246, 0.2)',
                 borderColor: 'rgba(59, 130, 246, 1)',
-                borderWidth: 1
+                borderWidth: 2,
+                tension: 0.3,
+                fill: true
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+            scales: { 
+                y: { 
+                    beginAtZero: true, 
+                    ticks: { stepSize: 1 } 
+                } 
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
         }
     });
 
+    // Graphique 2: Types de questions
     @php $questionTypes = $survey->questions->groupBy('question_type')->map->count(); @endphp
     const distributionCtx = document.getElementById('distributionChart').getContext('2d');
     new Chart(distributionCtx, {

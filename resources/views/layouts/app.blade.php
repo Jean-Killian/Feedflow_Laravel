@@ -27,11 +27,19 @@
 
             <!-- Page Content -->
             <main>
-                @isset($slot)
-                    {{ $slot }}
-                @else
-                    @yield('content')
-                @endisset
+                <div class="flex">
+                    <!-- Main Content -->
+                    <div class="flex-1">
+                        @isset($slot)
+                            {{ $slot }}
+                        @else
+                            @yield('content')
+                        @endisset
+                    </div>
+                    
+                    <!-- Sidebar -->
+                    @include('organizations.sidebar')
+                </div>
             </main>
 
         </div>

@@ -1,3 +1,6 @@
+@extends('layouts.app')
+
+@section('content')
 <div class="max-w-3xl mx-auto mt-8">
     <div class="bg-white shadow-lg rounded-lg p-6">
         <h2 class="text-2xl font-bold mb-6 text-gray-800">Ajouter une nouvelle question</h2>
@@ -39,3 +42,4 @@
         </form>
     </div>
 </div>
+@endsection
