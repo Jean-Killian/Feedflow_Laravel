@@ -97,6 +97,11 @@
                    class="px-4 py-2 bg-blue-600 text-black rounded hover:bg-blue-700">
                     🔗 Partager
                 </a>
+
+                <a href="{{ route('surveys.chart', $survey) }}"
+                   class="px-4 py-2 bg-teal-600 text-black rounded hover:bg-teal-700">
+                    📊 Graphiques
+                </a>
             </div>
         </div>
     @endforeach

@@ -244,6 +244,13 @@ class SurveyController extends Controller
         // Display public view
         return view('surveys.public', compact('survey'));
     }
+
+    public function chart(Survey $survey)
+    {
+        $survey->load('questions', 'answers');
+        
+        return view('chart.chart', compact('survey'));
+    }
 }
 
 
