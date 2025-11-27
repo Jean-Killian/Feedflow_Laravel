@@ -18,5 +18,12 @@ final class StoreSurveyAnswerAction
             'survey_question_id' => $dto->survey_question_id,
             'answer' => $dto->getFormattedAnswer(),
         ]);
+
+        $answer->load('question');
+        $survey = Survey::find($dto->survey_id);
+
+        SurveyAnswerSubmitted::dispatch($survey, $answer);
+
+        return $answer;
     }
 }

@@ -30,7 +30,4 @@ final class SurveyDTO
                 user_id: $request->user()->id
             );
         }
-
-
-
 }

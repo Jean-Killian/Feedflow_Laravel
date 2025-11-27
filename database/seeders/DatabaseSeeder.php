@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Models\Organization;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -15,13 +16,33 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Create default organization
+        $organization = Organization::create([
+            'name' => 'Organization par défaut',
+        ]);
 
-        User::create([
+        // Create default user
+        $user = User::create([
             'last_name'     => 'Doe',
             'first_name'    => 'John',
             'email'         => 'test@feedflow.local',
             'password'      => bcrypt('password'),
+            'email_notifications_enabled' => true,
+        ]);
+
+        // Create organization with user_id
+        $organization = Organization::create([
+            'name' => 'Organization par défaut',
+            'user_id' => $user->id,  // ← Ajout du user_id
+        ]);
+        
+        // Link user to organization
+        \DB::table('organization_user')->insert([
+            'organization_id' => $organization->id,
+            'user_id' => $user->id,
+            'role' => 'admin',
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
     }
 }
