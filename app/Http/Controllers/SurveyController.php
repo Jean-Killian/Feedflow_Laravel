@@ -26,9 +26,14 @@ class SurveyController extends Controller
     $user = auth()->user();
     $organizationId = $request->get('organization_id');
     
-    // Vérifier que l'organization_id est fourni
+    // Si aucune organisation n'est fournie, utiliser la première organisation de l'utilisateur
     if (!$organizationId) {
-        abort(400, 'Aucune organisation sélectionnée.');
+        $userOrganization = \App\Models\OrganizationUser::where('user_id', $user->id)->first();
+        if (!$userOrganization) {
+            return redirect()->route('dashboard')
+                ->with('error', 'Vous n\'appartenez à aucune organisation.');
+        }
+        $organizationId = $userOrganization->organization_id;
     }
     
     // Vérifier que l'organisation existe
@@ -96,7 +101,8 @@ class SurveyController extends Controller
         $dto = SurveyDTO::fromRequest($request);
         app(UpdateSurveyAction::class)->execute($dto, $survey);
 
-        return redirect()->route('surveys.index')->with('success', 'Sondage mis à jour !');
+        return redirect()->route('surveys.index', ['organization_id' => $survey->organization_id])
+            ->with('success', 'Sondage mis à jour !');
     }
 
 
@@ -104,9 +110,11 @@ class SurveyController extends Controller
     {
         $this->authorize('delete', $survey);
 
+        $organizationId = $survey->organization_id;
         $survey->delete();
 
-        return redirect()->route('surveys.index')->with('success', 'Sondage supprimé !');
+        return redirect()->route('surveys.index', ['organization_id' => $organizationId])
+            ->with('success', 'Sondage supprimé !');
     }
 
     public function addQuestion(Request $request, Survey $survey)
@@ -116,7 +124,7 @@ class SurveyController extends Controller
         $dto = SurveyQuestionDTO::fromRequest($request, $survey->id);
         app(StoreSurveyQuestionAction::class)->execute($dto);
 
-        return redirect()->route('surveys.index', $survey)
+        return redirect()->route('surveys.index', ['organization_id' => $survey->organization_id])
             ->with('success', 'Question ajoutée !');
     }
 
@@ -146,7 +154,7 @@ class SurveyController extends Controller
         $hasAnswered = $survey->answers()->where('user_id', $user->id)->exists();
 
         if ($hasAnswered) {
-            return redirect()->route('surveys.index')
+            return redirect()->route('surveys.index', ['organization_id' => $survey->organization_id])
                 ->with('info', 'Vous avez déjà répondu à ce sondage.');
         }
 
@@ -175,7 +183,7 @@ class SurveyController extends Controller
             ]);
         }
 
-        return redirect()->route('surveys.index')
+        return redirect()->route('surveys.index', ['organization_id' => $survey->organization_id])
             ->with('success', 'Questions mises à jour !');
     }
 
@@ -187,7 +195,7 @@ class SurveyController extends Controller
 
         // Vérifie si l'utilisateur connecté a déjà répondu (uniquement si pas anonyme)
         if ($userId && $survey->answers()->where('user_id', $userId)->exists()) {
-            return redirect()->route('surveys.index')
+            return redirect()->route('surveys.index', ['organization_id' => $survey->organization_id])
                 ->with('info', 'Vous avez déjà répondu à ce sondage.');
         }
 
@@ -211,7 +219,7 @@ class SurveyController extends Controller
             ]);
         }
 
-        return redirect()->route('surveys.index')
+        return redirect()->route('surveys.index', ['organization_id' => $survey->organization_id])
             ->with('success', 'Sondage répondu !');
     }
     
