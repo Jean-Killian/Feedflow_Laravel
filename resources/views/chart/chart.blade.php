@@ -3,29 +3,25 @@
 @section('content')
 <div class="max-w-6xl mx-auto mt-10 mb-10">
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold">📊 {{ $survey->title }}</h1>
-        <a href="{{ route('surveys.index', ['organization_id' => $survey->organization_id]) }}" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
-            ← Retour
-        </a>
+        <h1 class="text-2xl font-bold">{{ $survey->title }}</h1>
     </div>
 
-    {{-- Graphiques sur la même ligne --}}
+    <!-- Graphiques sur la même ligne -->
     <div class="bg-white shadow rounded-lg p-6 mb-6">
         <div class="flex gap-6">
             <div class="flex-1">
-                <h3 class="text-sm font-semibold mb-3">📈 Participation par question</h3>
+                <h3 class="text-sm font-semibold mb-3">participation par question</h3>
                 <canvas id="participationChart" style="max-height: 200px;"></canvas>
             </div>
             <div class="flex-1">
-                <h3 class="text-sm font-semibold mb-3">🥧 Types de questions</h3>
+                <h3 class="text-sm font-semibold mb-3">types de questions</h3>
                 <canvas id="distributionChart" style="max-height: 200px;"></canvas>
             </div>
         </div>
     </div>
 
-    {{-- Détail des réponses --}}
     <div class="bg-white shadow rounded-lg p-6">
-        <h2 class="text-lg font-semibold mb-4">Détail des réponses</h2>
+        <h2 class="text-lg font-semibold mb-4">détail des réponse</h2>
         
         <div class="space-y-6">
             @foreach($survey->questions as $question)

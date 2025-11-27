@@ -251,6 +251,7 @@ class SurveyController extends Controller
         
         return view('chart.chart', compact('survey'));
     }
+    
 }
 
 
