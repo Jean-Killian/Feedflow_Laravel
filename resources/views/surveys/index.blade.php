@@ -6,7 +6,7 @@
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold">📊 Liste des sondages</h1>
 
-        <a href="{{ route('surveys.create') }}"
+        <a href="{{ route('surveys.create', ['organization_id' => request('organization_id')]) }}"
            class="bg-green-600 text-black px-4 py-2 rounded hover:bg-green-700">
             ➕ Nouveau sondage
         </a>
@@ -96,6 +96,11 @@
                 <a href="{{ route('surveys.public', $token) }}"
                    class="px-4 py-2 bg-blue-600 text-black rounded hover:bg-blue-700">
                     🔗 Partager
+                </a>
+
+                <a href="{{ route('surveys.chart', $survey) }}"
+                   class="px-4 py-2 bg-teal-600 text-black rounded hover:bg-teal-700">
+                    📊 Graphiques
                 </a>
             </div>
         </div>

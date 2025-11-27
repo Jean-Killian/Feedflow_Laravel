@@ -56,6 +56,10 @@ Route::middleware('auth')->prefix('surveys')->group(function () {
     Route::post('/{survey}/submit', [SurveyController::class, 'submitSurvey'])
         ->name('surveys.submit');
     
+    // Graphiques
+    Route::get('/{survey}/chart', [SurveyController::class, 'chart'])
+        ->name('surveys.chart');
+    
     // Éditer toutes les questions d’un sondage
     Route::get('/{survey}/questions/edit', [SurveyController::class, 'editQuestions'])
     ->name('surveys.questions.edit_question');

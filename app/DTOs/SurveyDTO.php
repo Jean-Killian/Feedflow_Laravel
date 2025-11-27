@@ -26,7 +26,7 @@ final class SurveyDTO
                 start_date: $request->start_date,
                 end_date: $request->end_date,
                 is_anonymous: $request->has('is_anonymous'),
-                organization_id: 1, 
+                organization_id: $request->organization_id, 
                 user_id: $request->user()->id
             );
         }

@@ -19,14 +19,31 @@ use App\DTOs\SurveyAnswerDTO;
 
 class SurveyController extends Controller
 {
-
-    /**
-     * AFFICHE LA LISTE DES SONDAGES
-     */
-    public function index()
+    public function index(Request $request)
     {
     $user = auth()->user();
-    $surveys = Survey::with('answers')->where('organization_id', 1)->get();
+    $organizationId = $request->get('organization_id');
+    
+    // Si aucune organisation n'est fournie, utiliser la première organisation de l'utilisateur
+    if (!$organizationId) {
+        $userOrganization = \App\Models\OrganizationUser::where('user_id', $user->id)->first();
+        if (!$userOrganization) {
+            return redirect()->route('dashboard')
+                ->with('error', 'Vous n\'appartenez à aucune organisation.');
+        }
+        $organizationId = $userOrganization->organization_id;
+    }
+    
+    // Vérifier que l'organisation existe
+    $organization = \App\Models\Organization::find($organizationId);
+    if (!$organization) {
+        abort(404, 'Organisation introuvable.');
+    }
+    
+    // Filtrer les sondages par organisation
+    $surveys = Survey::with('answers')
+        ->where('organization_id', $organizationId)
+        ->get();
 
     foreach ($surveys as $survey) {
         $survey->hasAnswered = $survey->answers->contains(function($answer) use ($user) {
@@ -34,29 +51,29 @@ class SurveyController extends Controller
         });
     }
 
-    return view('surveys.index', compact('surveys'));
+    return view('surveys.index', compact('surveys', 'organization'));
     }
 
-    /**
-     * CREE UN SONDAGE ( PAGE FORMULAIRE)
-     */
-    public function create()
+
+    public function create(Request $request)
     {
-        return view('surveys.create');
+        $organizationId = $request->get('organization_id');
+        
+        $organization = \App\Models\Organization::find($organizationId);
+
+        return view('surveys.create', compact('organization'));
     }
 
-    /**
-     * CREEATION DU SONDAGE
-     */
+    
     public function store(StoreSurveyRequest $request)
     {
         $this->authorize('create', Survey::class);
 
-        // Crée le DTO avec organisation 1
         $dto = SurveyDTO::fromRequest($request);
         $survey = app(StoreSurveyAction::class)->execute($dto);
 
-        return redirect()->route('surveys.index')->with('success', 'Sondage créé !');
+        return redirect()->route('surveys.index', ['organization_id' => $request->organization_id])
+            ->with('success', 'Sondage créé !');
     }
 
     /**
@@ -79,7 +96,8 @@ class SurveyController extends Controller
         $dto = SurveyDTO::fromRequest($request);
         app(UpdateSurveyAction::class)->execute($dto, $survey);
 
-        return redirect()->route('surveys.index')->with('success', 'Sondage mis à jour !');
+        return redirect()->route('surveys.index', ['organization_id' => $survey->organization_id])
+            ->with('success', 'Sondage mis à jour !');
     }
 
     /**
@@ -89,9 +107,11 @@ class SurveyController extends Controller
     {
         $this->authorize('delete', $survey);
 
+        $organizationId = $survey->organization_id;
         $survey->delete();
 
-        return redirect()->route('surveys.index')->with('success', 'Sondage supprimé !');
+        return redirect()->route('surveys.index', ['organization_id' => $organizationId])
+            ->with('success', 'Sondage supprimé !');
     }
 
     /**
@@ -104,7 +124,7 @@ class SurveyController extends Controller
         $dto = SurveyQuestionDTO::fromRequest($request, $survey->id);
         app(StoreSurveyQuestionAction::class)->execute($dto);
 
-        return redirect()->route('surveys.index', $survey)
+        return redirect()->route('surveys.index', ['organization_id' => $survey->organization_id])
             ->with('success', 'Question ajoutée !');
     }
 
@@ -142,7 +162,7 @@ class SurveyController extends Controller
         $hasAnswered = $survey->answers()->where('user_id', $user->id)->exists();
 
         if ($hasAnswered) {
-            return redirect()->route('surveys.index')
+            return redirect()->route('surveys.index', ['organization_id' => $survey->organization_id])
                 ->with('info', 'Vous avez déjà répondu à ce sondage.');
         }
 
@@ -174,7 +194,7 @@ class SurveyController extends Controller
             ]);
         }
 
-        return redirect()->route('surveys.index')
+        return redirect()->route('surveys.index', ['organization_id' => $survey->organization_id])
             ->with('success', 'Questions mises à jour !');
     }
 
@@ -188,7 +208,7 @@ class SurveyController extends Controller
             : $request->user()->id;
 
         if ($userId && $survey->answers()->where('user_id', $userId)->exists()) {
-            return redirect()->route('surveys.index')
+            return redirect()->route('surveys.index', ['organization_id' => $survey->organization_id])
                 ->with('info', 'Vous avez déjà répondu à ce sondage.');
         }
 
@@ -203,7 +223,7 @@ class SurveyController extends Controller
             $storeAction->execute($dto);
         }
 
-        return redirect()->route('surveys.index')
+        return redirect()->route('surveys.index', ['organization_id' => $survey->organization_id])
             ->with('success', 'Sondage répondu !');
     }
 
@@ -214,6 +234,13 @@ class SurveyController extends Controller
         return view('surveys.public', compact('survey'));
     }
 
+    public function chart(Survey $survey)
+    {
+        $survey->load('questions', 'answers');
+        
+        return view('chart.chart', compact('survey'));
+    }
+    
 }
 
 

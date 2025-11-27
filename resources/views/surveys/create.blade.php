@@ -6,6 +6,7 @@
 
     <form action="{{ route('surveys.store') }}" method="POST">
         @csrf
+        <input type="hidden" name="organization_id" value="{{ request('organization_id') }}">
         <div class="mb-4">
             <label for="title" class="block font-medium">Titre</label>
             <input type="text" name="title" id="title" class="border p-2 w-full" required>
@@ -29,7 +30,7 @@
             </label>
 
         </div>
-        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Créer</button>
+        <button type="submit" class="bg-blue-500 text-darkgray px-4 py-2 rounded">Créer</button>
     </form>
 </div>
 @endsection

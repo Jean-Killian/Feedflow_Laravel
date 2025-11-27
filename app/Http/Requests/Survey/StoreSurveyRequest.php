@@ -26,7 +26,8 @@ class StoreSurveyRequest extends FormRequest
         'description' => 'nullable|string',
         'start_date' => 'required|date',
         'end_date' => 'required|date|after:start_date',
-        'is_anonymous' => 'boolean'
+        'is_anonymous' => 'boolean',
+        'organization_id' => 'required|exists:organizations,id'
         ];
     }
 }
