@@ -1,7 +1,8 @@
 <?php
 
 namespace App\Events;
-
+use App\Models\Survey;
+use App\Models\SurveyAnswer;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
