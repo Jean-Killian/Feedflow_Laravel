@@ -15,6 +15,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Actions\Survey\GetPublicSurveyAction;
 use App\Actions\Survey\StoreSurveyAnswerAction;
+use App\Actions\Survey\CheckSurveyAnsweredAction;
 use App\DTOs\SurveyAnswerDTO;
 
 class SurveyController extends Controller
@@ -45,11 +46,13 @@ class SurveyController extends Controller
         ->where('organization_id', $organizationId)
         ->get();
 
-    foreach ($surveys as $survey) {
-        $survey->hasAnswered = $survey->answers->contains(function($answer) use ($user) {
-            return $answer->user_id === $user->id || $answer->user_id === null;
-        });
+
+         $checker = app(CheckSurveyAnsweredAction::class);
+
+      foreach ($surveys as $survey) {
+        $survey->hasAnswered = $checker->execute($survey, $user);
     }
+    
 
     return view('surveys.index', compact('surveys', 'organization'));
     }
